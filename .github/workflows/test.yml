@@ -15,6 +15,4 @@ jobs:
           bun-version: latest # or "latest", "canary", <sha> #
 
       - run: bun install
-      - run: bun run dk:generate
-      - run: bun run dk:migrate
       - run: bun run test
