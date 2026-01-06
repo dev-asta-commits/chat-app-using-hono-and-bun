@@ -26,3 +26,6 @@ jobs:
 
       - name: Run tests
         run: bun run test
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          PORT: ${{ secrets.PORT }}
