@@ -6,7 +6,7 @@ import { eq } from "drizzle-orm";
 
 describe("Check if the server is working", () => {
   it("Should return 200 Response", async () => {
-    const req = new Request(`http://localhost:${process.env.PORT}/`);
+    const req = new Request(`http://localhost:${process.env.PORT || 3000}/`);
     const res = await app.fetch(req);
     expect(res.status).toBe(200);
   });
@@ -20,7 +20,7 @@ describe("Check if the signup route is woking", () => {
   };
   it("Sould return 200 Response", async () => {
     const req = new Request(
-      `http://localhost:${process.env.PORT}/api/auth/register`,
+      `http://localhost:${process.env.PORT || 3000}/api/auth/register`,
       {
         method: "POST",
         headers: {
@@ -42,7 +42,7 @@ describe("Check if the signup route is woking", () => {
   };
   it("Sould return 409 Response", async () => {
     const req = new Request(
-      `http://localhost:${process.env.PORT}/api/auth/register`,
+      `http://localhost:${process.env.PORT || 3000}/api/auth/register`,
       {
         method: "POST",
         headers: {
@@ -54,6 +54,6 @@ describe("Check if the signup route is woking", () => {
     const res = await app.fetch(req);
     expect(res.status).toBe(409);
 
-    db.delete(users).where(eq(users.email, testData.email));
+    await db.delete(users).where(eq(users.email, testData.email));
   });
 });
