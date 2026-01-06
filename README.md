@@ -1,11 +1,14 @@
-To install dependencies:
-```sh
-bun install
-```
+## Scripts 
+```shell
+<!--to start the dev server-->
+bun run dev 
 
-To run:
-```sh
-bun run dev
-```
+<!--to run tests-->
+bun run test
 
-open http://localhost:3000
+<!--to generate migrations-->
+bun run dk:generate
+
+<!--to apply migrations-->
+bun run dk:migrate
+```

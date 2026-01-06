@@ -1,6 +1,6 @@
-import { env } from "bun";
 import { Hono } from "hono";
-import { serveStatic } from "hono/bun";
+import { db } from "./libs/db";
+import { usersTable } from "./schemas/user.schema";
 
 // route imports :
 import auth from "./routes/auth.route";
@@ -15,6 +15,6 @@ app.get("/", (c) => {
 });
 
 export default {
-  port: env.PORT,
+  port: process.env.PORT,
   fetch: app.fetch,
 };
