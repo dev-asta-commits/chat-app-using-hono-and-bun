@@ -1,9 +1,10 @@
 import { Hono } from "hono";
 import { register, login, logout } from "../controllers/auth.controller";
+import { authValidator } from "../middlewares/zValidator";
 
 const app = new Hono();
 
-app.post("/register", register);
+app.post("/register", authValidator, register);
 
 app.post("/login", login);
 

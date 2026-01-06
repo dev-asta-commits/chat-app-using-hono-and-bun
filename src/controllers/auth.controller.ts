@@ -1,5 +1,5 @@
 import { Context } from "hono";
-import { User } from "../libs/validator";
+import { userSchema } from "../libs/validator";
 import { db } from "../libs/db";
 import { users } from "../schemas/user.schema";
 import { eq } from "drizzle-orm";
@@ -11,8 +11,7 @@ export const register = async (c: Context) => {
   try {
     const [user] = await db.select().from(users).where(eq(users.email, email));
     if (user) {
-      c.status(409);
-      return c.json({ message: "User already exists" });
+      return c.json({ message: "User already exists" }, 409);
     }
 
     const hashedPassword = await hashPassword(password);
@@ -24,12 +23,10 @@ export const register = async (c: Context) => {
 
     console.log("User created with userID : ", userID);
 
-    c.status(200);
-    return c.json({ message: "signed up succesfully" });
+    return c.json({ message: "signed up succesfully" }, 200);
   } catch (error) {
     console.log("Error in auth controller when signing up", error);
-    c.status(500);
-    return c.json({ message: "Error signing up. Internal server error." });
+    return c.json({ message: "Error signing up. Internal server error." }, 500);
   }
 };
 
