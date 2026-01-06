@@ -23,6 +23,8 @@ export const register = async (c: Context) => {
 
     console.log("User created with userID : ", userID);
 
+    // jwt implementation tba
+
     return c.json({ message: "signed up succesfully" }, 200);
   } catch (error) {
     console.log("Error in auth controller when signing up", error);
@@ -31,7 +33,14 @@ export const register = async (c: Context) => {
 };
 
 export const login = async (c: Context) => {
-  return c.text("hello login");
+  const { email, password } = await c.req.json();
+
+  try {
+    // tba
+  } catch (error) {
+    console.log("Error in auth controller when logging in.", error);
+    return c.json({ message: "Internal server error" }, 500);
+  }
 };
 
 export const logout = async (c: Context) => {

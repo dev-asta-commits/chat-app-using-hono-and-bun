@@ -6,8 +6,8 @@ const app = new Hono();
 
 app.post("/register", authValidator, register);
 
-app.post("/login", login);
+app.post("/login", authValidator, login);
 
-app.post("/logout", logout);
+app.post("/logout", authValidator, logout);
 
 export default app;
