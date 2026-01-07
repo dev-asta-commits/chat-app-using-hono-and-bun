@@ -25,7 +25,7 @@ export const register = async (c: Context) => {
 
     console.log("User created with userID : ", userID);
 
-    const token = await generateToken(userID.insertedId, c);
+    await generateToken(userID.insertedId, c);
 
     return c.json({ message: "signed up succesfully" }, 200);
   } catch (error) {
@@ -44,7 +44,10 @@ export const login = async (c: Context) => {
     }
     const isPasswordCorrect = await bcrypt.compare(password, user.password);
 
-    generateToken(user.id, c);
+    if (!isPasswordCorrect) {
+      return c.json({ message: "Invalid email or password" }, 404);
+    }
+    await generateToken(user.id, c);
 
     return c.json({ message: "Logged in succesfully" }, 200);
   } catch (error) {
@@ -57,9 +60,9 @@ export const logout = async (c: Context) => {
   try {
     deleteCookie(c, "session_token");
     console.log("Error while loggin out");
-    c.json({ message: "Logged out successfully" }, 200);
+    return c.json({ message: "Logged out successfully" }, 200);
   } catch (error) {
     console.log("Error in auth controller while logging out.", error);
-    c.json({ message: "Internal server error." }, 500);
+    return c.json({ message: "Internal server error." }, 500);
   }
 };
