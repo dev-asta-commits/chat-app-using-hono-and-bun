@@ -2,9 +2,14 @@ import { sign } from "hono/jwt";
 import { setCookie } from "hono/cookie";
 import { Context } from "hono";
 
-export const generateToken = async (userID: number, c: Context) => {
+export const generateToken = async (
+  userID: number,
+  username: string,
+  c: Context,
+) => {
   const payload = {
     sub: userID,
+    username: username,
     exp: Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 7,
   };
 

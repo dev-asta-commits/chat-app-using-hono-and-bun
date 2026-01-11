@@ -1,7 +1,6 @@
 import { Hono } from "hono";
 import { register, login, logout } from "../controllers/auth.controller";
 import { authValidator } from "../middlewares/zValidator";
-import protectRoutes from "../middlewares/ptotectRoutes";
 
 const app = new Hono();
 

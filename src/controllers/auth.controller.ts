@@ -25,7 +25,7 @@ export const register = async (c: Context) => {
 
     console.log("User created with userID : ", userID);
 
-    await generateToken(userID.insertedId, c);
+    await generateToken(userID.insertedId, username, c);
 
     return c.json({ message: "signed up succesfully" }, 200);
   } catch (error) {
@@ -47,7 +47,7 @@ export const login = async (c: Context) => {
     if (!isPasswordCorrect) {
       return c.json({ message: "Invalid email or password" }, 404);
     }
-    await generateToken(user.id, c);
+    await generateToken(user.id, user.username, c);
 
     return c.json({ message: "Logged in succesfully" }, 200);
   } catch (error) {
