@@ -1,20 +1,20 @@
 import * as z from "zod";
 
 export const userSchema = z.object({
-  username: z
-    .string()
-    .min(3, { message: "Username must be atleas 3 characters long" })
-    .optional(),
-  email: z.email({ message: "Invalid email address" }),
-  password: z
-    .string()
-    .min(6, { message: "Password must be atleast 6 characters long" }),
+    username: z
+        .string()
+        .min(3, { message: "Username must be atleas 3 characters long" })
+        .optional(),
+    email: z.email({ message: "Invalid email address" }),
+    password: z
+        .string()
+        .min(6, { message: "Password must be atleast 6 characters long" }),
 });
 
-export const msgSchema = z.object({
-  username: z
-    .string()
-    .min(3, { message: "Username must be atleas 3 characters long" }),
-  email: z.email({ message: "Invalid email address" }),
-  message: z.string().min(1, { message: "Message can't be empty" }),
-});
+// export const msgSchema = z.object({
+//   username: z
+//     .string()
+//     .min(3, { message: "Username must be atleas 3 characters long" }),
+//   email: z.email({ message: "Invalid email address" }),
+//   message: z.string().min(1, { message: "Message can't be empty" }),
+// });

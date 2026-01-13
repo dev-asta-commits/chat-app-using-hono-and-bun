@@ -7,14 +7,7 @@ import { userType } from "../libs/types";
 
 const app = new Hono<{ Variables: { user: userType } }>();
 
-app.get("/get", authMiddleware, (c) => {
-  // proper implementation tba
-  const user = c.get("user");
-  if (!user) {
-    c.json({ messge: "Unauthorized. user not found the token or what" }, 404);
-  }
-  return c.json(user, 200);
-});
+app.get("/get/:id", authMiddleware, getMessages);
 
 app.get("/send/:id", authMiddleware, sendMessages);
 

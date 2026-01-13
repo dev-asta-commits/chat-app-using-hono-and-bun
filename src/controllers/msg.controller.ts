@@ -1,49 +1,85 @@
-import { Context } from "hono";
 import { messages } from "../schemas/message.schema";
 import { db } from "../libs/db";
 import { upgradeWebSocket } from "hono/bun";
+import { and, eq, or } from "drizzle-orm";
 
-export const getMessages = async (c: Context) => {
-  const { username, senderId, receiverId, message } = await c.req.json();
+export const getMessages = upgradeWebSocket((c) => {
+    const receiverId = c.req.param("id");
 
-  if (username && senderId && message && receiverId) {
-    return c.json({ username, senderId, receiverId, message });
-  }
-};
+    const user = c.get("user");
+
+    const { id: senderId, username, email } = user;
+
+    return {
+        async onOpen(event, ws) {
+            try {
+                const receivedMessages = await db
+                    .select()
+                    .from(messages)
+                    .where(
+                        or(
+                            and(
+                                eq(messages.senderId, String(senderId)),
+                                eq(messages.receiverId, receiverId),
+                            ),
+                            and(
+                                eq(messages.senderId, receiverId),
+                                eq(messages.receiverId, String(senderId)),
+                            ),
+                        ),
+                    );
+
+                ws.send(
+                    JSON.stringify({
+                        type: "HISTORY",
+                        data: receivedMessages,
+                    }),
+                );
+            } catch (error) {
+                console.log("Error in getMessages controller", error);
+                ws.send("");
+            }
+        },
+    };
+});
 
 export const sendMessages = upgradeWebSocket((c) => {
-  const receiverId = c.req.param("id");
-  const user = c.get("user");
+    const receiverId = c.req.param("id");
+    const user = c.get("user");
 
-  const { id: senderId, username } = user;
+    const { id: senderId, username } = user;
 
-  return {
-    async onMessage(event, ws) {
-      try {
-        const message = event.data.toString();
+    return {
+        async onMessage(event, ws) {
+            try {
+                const message = event.data.toString();
 
-        const messageData = {
-          senderId,
-          username,
-          receiverId,
-          message,
-        };
+                const messageData = {
+                    senderId,
+                    username,
+                    receiverId,
+                    message,
+                };
 
-        console.log(
-          "Saving message for ID:",
-          messageData.receiverId,
-          messageData,
-        );
+                console.log(
+                    "Saving message for ID:",
+                    messageData.receiverId,
+                    messageData,
+                );
 
-        await db.insert(messages).values(messageData);
+                await db.insert(messages).values(messageData);
 
-        ws.send("Message saved");
-      } catch (error) {
-        console.log("Error in websocket message send controller", error);
-      }
-    },
-    onClose: () => {
-      console.log("Connection closed");
-    },
-  };
+                ws.send("Message saved");
+                ws.close();
+            } catch (error) {
+                console.log(
+                    "Error in websocket message send controller",
+                    error,
+                );
+            }
+        },
+        onClose: () => {
+            console.log("Connection closed");
+        },
+    };
 });
