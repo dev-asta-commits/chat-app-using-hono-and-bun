@@ -1,20 +1,48 @@
 import { Hono } from "hono";
-import {
-    getMessages,
-    sendMessages,
-    getUsers,
-} from "../controllers/msg.controller";
+import { upgradeWebSocket } from "hono/bun";
 import { authMiddleware } from "../middlewares/authMiddleware";
-
-// type imports
+import { db } from "../libs/db";
 import { userType } from "../libs/types";
+import {
+    sendMessages,
+    setOnlineStatus,
+    setOfflineStatus,
+} from "../controllers/msg.controller";
 
-const app = new Hono<{ Variables: { user: userType } }>();
+const app = new Hono();
+const userOnline = new Map<number, boolean>();
 
-app.get("/users", authMiddleware, getUsers);
+app.get(
+    "/get-users",
+    authMiddleware,
+    // todo...
+);
 
-app.get("/get/:id", authMiddleware, getMessages);
+app.get(
+    "/ws",
+    authMiddleware,
+    upgradeWebSocket((c) => {
+        const receiverId = c.req.param("id");
 
-app.get("/send/:id", authMiddleware, sendMessages);
+        const user: userType = c.get("user");
+
+        return {
+            // when the Connection is established...
+            onOpen: (event, ws) => {
+                setOnlineStatus(ws, user, userOnline);
+            },
+
+            // when the user sends a message...
+            onMessage(event, ws) {
+                sendMessages(db, ws, event, user, Number(receiverId));
+
+                // when the Connection is closed...
+            },
+            onClose: () => {
+                setOfflineStatus(user, userOnline);
+            },
+        };
+    }),
+);
 
 export default app;
