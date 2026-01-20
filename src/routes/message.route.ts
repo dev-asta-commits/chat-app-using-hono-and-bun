@@ -1,11 +1,17 @@
 import { Hono } from "hono";
-import { getMessages, sendMessages } from "../controllers/msg.controller";
+import {
+    getMessages,
+    sendMessages,
+    getUsers,
+} from "../controllers/msg.controller";
 import { authMiddleware } from "../middlewares/authMiddleware";
 
 // type imports
 import { userType } from "../libs/types";
 
 const app = new Hono<{ Variables: { user: userType } }>();
+
+app.get("/users", authMiddleware, getUsers);
 
 app.get("/get/:id", authMiddleware, getMessages);
 

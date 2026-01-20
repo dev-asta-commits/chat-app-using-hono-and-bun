@@ -2,6 +2,8 @@ import { messages } from "../schemas/message.schema";
 import { db } from "../libs/db";
 import { upgradeWebSocket } from "hono/bun";
 import { and, eq, or } from "drizzle-orm";
+import { Context } from "hono";
+import { users } from "../schemas/user.schema";
 
 export const getMessages = upgradeWebSocket((c) => {
     const receiverId = c.req.param("id");
@@ -83,3 +85,20 @@ export const sendMessages = upgradeWebSocket((c) => {
         },
     };
 });
+
+export const getUsers = async (c: Context) => {
+    const { id, email, username } = c.get("user");
+
+    try {
+        const userList = await db
+            .select({
+                id: users.id,
+                email: users.email,
+                username: users.username,
+            })
+            .from(users);
+        // todo...
+    } catch (error) {
+        console.log("There was an error in the getUsers controller.", error);
+    }
+};
