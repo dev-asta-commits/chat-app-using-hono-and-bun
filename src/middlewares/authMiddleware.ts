@@ -10,7 +10,6 @@ export const authMiddleware = async (c: Context, next: Next) => {
         const token = getCookie(c, "session_token");
 
         if (!token) {
-            console.log("Unauthorized user. token not found.");
             return c.json({ message: "Unauthorized. token not found." }, 401);
         }
 
@@ -18,7 +17,6 @@ export const authMiddleware = async (c: Context, next: Next) => {
         const decodedToken = await verify(token!, secret, "HS512");
 
         if (!decodedToken) {
-            console.log("Unauthorized user. Invalid token");
             return c.json({ mesage: "Unauthorized. Invalid token" }, 401);
         }
 

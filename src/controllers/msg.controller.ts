@@ -1,10 +1,13 @@
-import { BunSQLDatabase } from "drizzle-orm/bun-sql";
+import { db } from "../libs/db";
 import { WSContext } from "hono/ws";
 import { messages } from "../schemas/message.schema";
 import { userType } from "../libs/types";
+import { Context } from "hono";
+import { users } from "../schemas/user.schema";
+import { eq, not, or } from "drizzle-orm";
+import { userOnline } from "../libs/store";
 
 export const sendMessages = async (
-    db: BunSQLDatabase,
     ws: WSContext,
     event: MessageEvent,
     user: userType,
@@ -46,11 +49,34 @@ export const sendMessages = async (
     }
 };
 
-export const setOnlineStatus = async (
-    ws: WSContext,
-    user: userType,
-    userOnline: Map<number, boolean>,
-) => {
+export const getMessages = async (c: Context) => {
+    try {
+        const user: userType = c.get("user");
+
+        const receiverId = c.req.param("id");
+
+        if (!user || !receiverId) {
+            return c.json({ message: "Invalid prameters" }, 404);
+        }
+
+        const messageList = await db
+            .select()
+            .from(messages)
+            .where(
+                or(
+                    eq(messages.senderId, user.id),
+                    eq(messages.receiverId, user.id),
+                ),
+            );
+
+        return c.json({ messages: messageList }, 200);
+    } catch (error) {
+        console.log("Error in getMessages controller");
+        return c.json({ message: "Internal server error" }, 500);
+    }
+};
+
+export const setOnlineStatus = async (ws: WSContext, user: userType) => {
     try {
         const { id: senderId } = user;
 
@@ -74,14 +100,31 @@ export const setOnlineStatus = async (
     }
 };
 
-export const setOfflineStatus = async (
-    user: userType,
-    userOnline: Map<number, boolean>,
-) => {
+export const setOfflineStatus = async (user: userType) => {
     try {
         const { id: senderId } = user;
         userOnline.set(senderId, false);
     } catch (error) {
         console.log("Error in setOfflineStatus", error);
+    }
+};
+
+export const getUsers = async (c: Context) => {
+    try {
+        const user: userType = c.get("user");
+
+        if (!user) {
+            return c.json({ message: "The user isn't authenticated yet" }, 401);
+        }
+
+        const userList = await db
+            .select({ id: users.id, usernme: users.id })
+            .from(users)
+            .where(not(eq(users.id, user.id)));
+
+        return c.json({ userList });
+    } catch (error) {
+        console.log("Error in getUsers controller", error);
+        return c.json({ message: "Internal server error" }, 500);
     }
 };
